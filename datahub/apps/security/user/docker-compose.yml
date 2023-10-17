@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+
+  security_back_user:
+    build: ./smartcity_back
+    image: security_back_user
+    container_name: security_back_user
+    ports:
+      - 40000:40000
+    volumes:
+      - ./logs/back:/logs
+    environment:
+      - TZ=Asia/Seoul
+    restart: always
+
+  security_front_user:
+    build: ./smartcity_front
+    image: security_front_user
+    container_name: security_front_user
+    ports:
+      - 40001:40001
+    volumes:
+      - ./logs/front:/logs
+    environment:
+      - TZ=Asia/Seoul
+    restart: always

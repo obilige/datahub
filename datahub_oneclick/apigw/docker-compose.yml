@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+
+  apigw:
+    build: ./
+    image: apigw
+    ports:
+      - 28888:28888
+    volumes:
+      - ./logs:/logs
+    environment:
+      - TZ=Asia/Seoul
+      - SERVER_PORT=28888
+      - EUREKA_DEFAULT_ZONE=http://211.189.131.71:18888/eureka
+      - REDIS_HOST=211.189.131.71
+      - DATASOURCE_URL= jdbc:postgresql://211.189.131.71:5432/apigw
+      - DATASOURCE_USERNAME=postgres
+      - DATASOURCE_PASSWORD=nb1234
+      - CITYHUB_CLIENT_PUBLICKEYURI=http://211.189.131.71:40000/security/publickey
+    restart: always
+networks:
+  default:
+    name: citydatahub-datacore
+    external: true
+

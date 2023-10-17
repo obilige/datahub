@@ -1,0 +1,100 @@
+server:
+  port: ${GATEWAY_SERVER_PORT}
+  ssl:
+    enabled: false
+    key-store: keystore.p12
+    key-alias: keti
+    key-store-password: ketiketi
+    key-store-type: PKCS12
+
+spring:
+  application:
+    name: DH-APIGW
+
+# 라우팅에 대한 타임아웃 정책
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 10000
+        response-timeout: 10s
+      discovery.locator.enabled: true
+    circuitbreaker.resilience4j.enabled: true
+
+# Datasource
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+
+# REDIS 서버 설정
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
+
+# EUREKA 서버 설정
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE}
+    registerWithEureka: true
+    fetchRegistry: true
+    registryFetchIntervalSeconds: 30
+  instance:
+    prefer-ip-address: true
+    metadata-map:
+      management-port: ${management.server.port}
+      management-context-path: ${management.endpoints.web.base-path}
+      
+
+# Routing Retry 설정
+routingRetry:
+  retryValue: 3
+
+## ClientRateLimit 설정
+clientRateLimit:
+  scope: none #local cluster
+  type: clientId #clientId ip hostName
+  burstCapacity: 1000
+
+# Logging
+logging:
+  level:
+    ROOT : INFO
+
+# Propagation 설정
+propagate:
+  serviceId : ${spring.application.name}
+  refresh.path : /routes/refresh
+  request:
+    timeout : 5
+    retry.Count: 3
+
+# Security
+security:
+  accessToken:
+    publicKeyRetrievalUri: ${CITYHUB_CLIENT_PUBLICKEYURI}
+    defaultPublicKey: -----BEGIN PUBLIC KEY-----
+              MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsv9AlFCfnjnPQ6/s4GIy
+              YMYZqmACZMenE2cil/deHNd7dzuwKxTi2GMv1j6mZkkm2zNkRimyVin762OHvezd
+              DP1io2hKKhOWFmWTJnbpW5f54IGZmf4HpSzeb4GiWtXfL149Zk6hgbfSspgky0Ho
+              0YMq6jvfQ3FC9f/bXBDRL4fogwmOOrfCA7N00efxRa15zNIstppNROXublyQfF+t
+              IMY1n65h54xv3qGa/5eC8n08cNsFGuYaNpkADktFrgHqmBRb0AfnAZ7aJN7+gQpj
+              d/zjJ9197GobyiZ45LpeTM+F1BxhRcNU9vjq8wzHYgw+EICzpxOol22nl3nLfW5i
+              +wIDAQAB
+              -----END PUBLIC KEY-----
+              
+management:
+  server:
+    port: 8081
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure.include: routes,services
+      base-path: /
+      
+# ManagementInterface 설정
+managementInterface:
+  security:
+    enabled: true
+    allowed-access-token-roles: System_Admin

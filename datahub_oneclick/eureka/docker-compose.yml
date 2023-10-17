@@ -1,0 +1,12 @@
+version: "3"
+services:
+
+  eureka-server:
+    build: ./
+    image: server
+    ports:
+      - 18888:18888
+    volumes:
+      - ./logs:/logs
+    environment:
+      - TZ=Asia/Seoul

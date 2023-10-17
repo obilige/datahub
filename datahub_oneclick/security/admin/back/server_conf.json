@@ -1,0 +1,14 @@
+{
+  "serverip": "211.189.131.71",
+  "serverport": "30000",
+  "dbUserId": "smartcity",
+  "dbUserPwd": "nb1234",
+  "dbHost": "211.189.131.71",
+  "dbName": "security",
+  "dbPort": "5432",
+  "emailAccountId": "enter your e-mail for sending verification code",
+  "emailAccountPwd": "account verification code",
+  "token_type": "JWS",
+  "program_type": "admin",
+  "default_url": "211.189.131.71:30001"
+}
