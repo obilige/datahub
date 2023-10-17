@@ -274,6 +274,75 @@ services:
     environment:
       - TZ=Asia/Seoul
 
+  # ingest ----------------------------------
+  ingest-daemon:
+    container_name: ingest-daemon
+    image: pinecni/ingest-daemon:latest
+    hostname: ingest-daemon
+    ports:
+      - 9888:8888
+    volumes:
+      - ./logs:/opt/logs:Z  
+    environment:
+      - TZ=Asia/Seoul
+      - DATASOURCE_DRIVER=org.postgresql.Driver
+      - DATASOURCE_URL=jdbc:postgresql://211.189.131.71:5432/ingest
+      - DATASOURCE_ID=smartcity
+      - DATASOURCE_PW=nb1234
+      - INGEST_INTERFACE_API_USE_YN=Y
+      - INGEST_INTERFACE_API_URL=http://211.189.131.71:8081/entityOperations/upsert?options=update
+      - LOG_LEVEL=info
+    restart: always
+
+  ingest-web:
+    container_name: ingest-web
+    image: pinecni/ingest-web:latest 
+    hostname: ingest-web
+    ports:
+      - 9080:8080
+    volumes:
+      - ./logs:/opt/logs:Z        
+    environment:
+      - TZ=Asia/Seoul
+      - DATASOURCE_DRIVER=org.postgresql.Driver
+      - DATASOURCE_URL=jdbc:postgresql://211.189.131.71:5432/ingest
+      - DATASOURCE_ID=smartcity
+      - DATASOURCE_PW=nb1234
+      - DAEMON_URL=http://ingest-daemon:8888
+      - DATAMODEL_API_URL=http://211.189.131.71:8080/datamodels
+      - INGEST_INTERFACE_API_USE_YN=Y
+      - INGEST_INTERFACE_API_URL=http://211.189.131.71:8081/entityOperations/upsert?options=update
+      - AUTH_YN=Y
+      - AUTH_EXTERNAL_URL=http://211.189.131.71:40000
+      - AUTH_INTERNAL_URL=http://211.189.131.71:40000
+      - AUTH_CLIENT_ID=DRJr9Fw5Lt3yd8KrCnOm
+      - AUTH_CLIENT_SECRET=rA9xiKK3vrciSZJvnQofdc6r95MjSDtu
+      - AUTH_REDIRECT_URL=http://211.189.131.71:9080/accesstoken
+      - EUREKA_ENABLED=false
+      - EUREKA_EUREKA_DEFAULT_ZONE=http://211.189.131.71:18888/eureka
+      - LOG_LEVEL=info
+    depends_on:
+      ingest-daemon:
+        condition: service_started     
+    restart: always
+  # ingest ----------------------------------
+
+  db:
+    build: ./
+    image: postgresql
+    container_name: pgsql
+    environment:
+      TZ: Asia/Seoul
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: nb1234
+      POSTGRES_DB: postgres
+      POSTGRES_INITDB_ARGS: "--locale=ko_KR.utf8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
   redis_container:
     image: redis:latest
     container_name: redis_chungnam
@@ -287,6 +356,61 @@ services:
       - "mode=standalone"
     restart: always
     command: redis-server /usr/local/conf/redis.conf
+
+  # security/admin ----------------------------------
+  security_back_admin:
+    build: ./smartcity_back
+    image: security_back_admin
+    container_name: security_back_admin
+    ports:
+      - 30000:30000
+    volumes:
+      - ./logs/back:/logs
+    environment:
+      - TZ=Asia/Seoul
+    restart: always
+
+  security_front_admin:
+    build: ./smartcity_front
+    image: security_front_admin
+    container_name: security_front_admin
+    ports:
+      - 30001:30001
+    volumes:
+      - ./logs/front:/logs
+    environment:
+      - TZ=Asia/Seoul
+    restart: always
+  # security/admin ----------------------------------
+
+  # security/user ----------------------------------
+  security_back_user:
+    build: ./smartcity_back
+    image: security_back_user
+    container_name: security_back_user
+    ports:
+      - 40000:40000
+    volumes:
+      - ./logs/back:/logs
+    environment:
+      - TZ=Asia/Seoul
+    restart: always
+
+  security_front_user:
+    build: ./smartcity_front
+    image: security_front_user
+    container_name: security_front_user
+    ports:
+      - 40001:40001
+    volumes:
+      - ./logs/front:/logs
+    environment:
+      - TZ=Asia/Seoul
+    restart: always
+  # security/user ----------------------------------
+
+volumes:
+  pgdata:
 
 networks:
   default:
